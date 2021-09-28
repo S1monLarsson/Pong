@@ -1,6 +1,7 @@
 # Import required library
 import turtle
 import keyboard
+from paddle import Paddle
 
 wn = turtle.Screen()
 wn.title("Pong")
@@ -13,12 +14,13 @@ score_l = 0
 score_r = 0
 
 # Left paddle
-paddle_l = turtle.Turtle()
-paddle_l.shape("square")
-paddle_l.color("white")
-paddle_l.penup()
-paddle_l.goto(-350, 0)
-paddle_l.shapesize(5, 1)
+paddle_l = Paddle("paddle_l", -350)
+paddle_l.setup()
+#paddle_l.shape("square")
+#paddle_l.color("white")
+#paddle_l.penup()
+#paddle_l.goto(-350, 0)
+#paddle_l.shapesize(5, 1)
 
 # Right paddle
 paddle_r = turtle.Turtle()
@@ -56,20 +58,20 @@ pen.write("{}            {}".format(score_l, score_r),
 
 
 def paddle_l_up():
-    y = paddle_l.ycor()
+    y = paddle_l.get_y()
     if y <= 230:
         y += 20
     else:
         y = 250
-    paddle_l.sety(y)
+    paddle_l.set_y(y)
 
 def paddle_l_down():
-    y = paddle_l.ycor()
+    y = paddle_l.get_y()
     if y >= -230:
         y -= 20
     else:
         y = -250
-    paddle_l.sety(y)
+    paddle_l.set_y(y)
 
 def paddle_r_up():
     y = paddle_r.ycor()
