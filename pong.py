@@ -1,7 +1,5 @@
-
 # Import required library
 import turtle
-import os
 import keyboard
 
 wn = turtle.Screen()
@@ -9,6 +7,10 @@ wn.title("Pong")
 wn.bgcolor("Black")
 wn.setup(width=800, height=600)
 wn.tracer(0)
+
+# Score
+score_l = 0
+score_r = 0
 
 # Left paddle
 paddle_l = turtle.Turtle()
@@ -26,7 +28,6 @@ paddle_r.penup()
 paddle_r.goto(350, 0)
 paddle_r.shapesize(5, 1)
 
-
 # Ball
 ball = turtle.Turtle()
 ball.shape("circle")
@@ -36,26 +37,60 @@ ball.goto(0, 0)
 ball.dx = 0.15
 ball.dy = 0.15
 
+# Middle line
+line = turtle.Turtle()
+line.shape("square")
+line.color("white")
+line.penup()
+line.shapesize(30, 0.1)
+
+# Pen
+pen = turtle.Turtle()
+pen.penup()
+pen.color("white")
+pen.speed(0)
+pen.hideturtle()
+pen.goto(0, 250)
+pen.write("{}            {}".format(score_l, score_r), 
+          align="center", font=("Courier", 24, "normal"))
+
 
 def paddle_l_up():
     y = paddle_l.ycor()
-    y += 20
+    if y <= 230:
+        y += 20
+    else:
+        y = 250
     paddle_l.sety(y)
 
 def paddle_l_down():
     y = paddle_l.ycor()
-    y -= 20
+    if y >= -230:
+        y -= 20
+    else:
+        y = -250
     paddle_l.sety(y)
 
 def paddle_r_up():
     y = paddle_r.ycor()
-    y += 20
+    if y <= 230:
+        y += 20
+    else:
+        y = 250
     paddle_r.sety(y)
 
 def paddle_r_down():
     y = paddle_r.ycor()
-    y -= 20
+    if y >= -230:
+        y -= 20
+    else:
+        y = -250
     paddle_r.sety(y)
+
+def update_score():
+    pen.clear()
+    pen.write("{}            {}".format(score_l, score_r), 
+                align="center", font=("Courier", 24, "normal")) 
 
 # Keyboard binding
 wn.listen()
@@ -64,7 +99,7 @@ wn.onkeypress(paddle_l_down, "s")
 wn.onkeypress(paddle_r_up, "Up")
 wn.onkeypress(paddle_r_down, "Down")
 
-times_lost = 0
+
 # Game loop
 while True:
     wn.update()
@@ -88,21 +123,21 @@ while True:
             ball.setx(330)
             ball.dx *= -1 
         else:
-            times_lost+=1
-            wn.title("lost: " + str(times_lost))
+            score_l+=1
             ball.goto(0,0)
             ball.dx *= -1 
+            update_score()
 
     if ball.xcor() < -330:
         # Check if padel is behind the ball
-        if (paddle_r.ycor()-50) <= ball.ycor() <= (paddle_r.ycor()+50):
+        if (paddle_l.ycor()-50) <= ball.ycor() <= (paddle_l.ycor()+50):
             ball.setx(-330)
             ball.dx *= -1 
         else:
-            times_lost+=1
-            wn.title("lost: " + str(times_lost))
+            score_r+=1
             ball.goto(0,0)
-            ball.dx *= -1 
+            ball.dx *= -1
+            update_score()
 
 
     # Exit on q key press
