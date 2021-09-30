@@ -1,38 +1,22 @@
 # Import required library
 import turtle
-import keyboard
 from paddle import Paddle
 
+# Gamescreen
 wn = turtle.Screen()
 wn.title("Pong")
 wn.bgcolor("Black")
 wn.setup(width=800, height=600)
 wn.tracer(0)
 
-# Score
-score_l = 0
-score_r = 0
-
 # Left paddle
-paddle_l = Paddle("paddle_l", -350)
-paddle_l.setup()
-#paddle_l.shape("square")
-#paddle_l.color("white")
-#paddle_l.penup()
-#paddle_l.goto(-350, 0)
-#paddle_l.shapesize(5, 1)
+paddle_l = Paddle("Player A", -350)
 
 # Right paddle
-paddle_r = turtle.Turtle()
-paddle_r.shape("square")
-paddle_r.color("white")
-paddle_r.penup()
-paddle_r.goto(350, 0)
-paddle_r.shapesize(5, 1)
+paddle_r = Paddle("Player B", 350)
 
 # Ball
-ball = turtle.Turtle()
-ball.shape("circle")
+ball = turtle.Turtle(shape="circle")
 ball.color("white")
 ball.penup()
 ball.goto(0, 0)
@@ -40,67 +24,60 @@ ball.dx = 0.15
 ball.dy = 0.15
 
 # Middle line
-line = turtle.Turtle()
-line.shape("square")
+line = turtle.Turtle(shape="square")
 line.color("white")
 line.penup()
 line.shapesize(30, 0.1)
 
-# Pen
-pen = turtle.Turtle()
-pen.penup()
-pen.color("white")
-pen.speed(0)
-pen.hideturtle()
-pen.goto(0, 250)
-pen.write("{}            {}".format(score_l, score_r), 
+# Score
+score = turtle.Turtle()
+score.penup()
+score.color("white")
+score.speed(0)
+score.hideturtle()
+score.goto(0, 250)
+score.write("{}            {}".format(paddle_l.score, paddle_r.score), 
           align="center", font=("Courier", 24, "normal"))
 
+# Keyboard binding, paddle moves on release
+wn.listen()
+wn.onkey(paddle_l.up, "w")
+wn.onkey(paddle_l.down, "s")
+wn.onkey(paddle_r.up, "Up")
+wn.onkey(paddle_r.down, "Down")
+wn.onkey(wn.bye, "q")
 
-def paddle_l_up():
-    y = paddle_l.get_y()
-    if y <= 230:
-        y += 20
-    else:
-        y = 250
-    paddle_l.set_y(y)
 
-def paddle_l_down():
-    y = paddle_l.get_y()
-    if y >= -230:
-        y -= 20
-    else:
-        y = -250
-    paddle_l.set_y(y)
+# Functions
 
-def paddle_r_up():
-    y = paddle_r.ycor()
-    if y <= 230:
-        y += 20
-    else:
-        y = 250
-    paddle_r.sety(y)
-
-def paddle_r_down():
-    y = paddle_r.ycor()
-    if y >= -230:
-        y -= 20
-    else:
-        y = -250
-    paddle_r.sety(y)
-
+# Write updated score
 def update_score():
-    pen.clear()
-    pen.write("{}            {}".format(score_l, score_r), 
+    score.clear()
+    score.write("{}            {}".format(paddle_l.score, paddle_r.score), 
                 align="center", font=("Courier", 24, "normal")) 
 
-# Keyboard binding
-wn.listen()
-wn.onkeypress(paddle_l_up, "w")
-wn.onkeypress(paddle_l_down, "s")
-wn.onkeypress(paddle_r_up, "Up")
-wn.onkeypress(paddle_r_down, "Down")
+# Check if padel is behind the ball
+def paddle_bounce(paddle, x):
+    if (paddle.get_y()-50) <= ball.ycor() <= (paddle.get_y()+50):
+        ball.setx(x)
+        ball.dx *= -1 
+        return True
+    else:
+        return False
 
+# Update score and reset ball
+def goal(paddle):
+    paddle.score+=1
+    ball.goto(0,0)
+    ball.dx *= -1
+    if paddle.score == 10:
+        score.clear()
+        score.write("{} won!  ".format(paddle.name), 
+                    align="right", font=("Courier", 24, "normal"))
+        wn.mainloop()
+    else:
+        update_score()
+        
 
 # Game loop
 while True:
@@ -119,31 +96,19 @@ while True:
         ball.sety(-290)
         ball.dy *= -1 
     
+    # Ball has reached right edge, 
+    # should be goal or paddle bounce
     if ball.xcor() > 330:
-        # Check if padel is behind the ball
-        if (paddle_r.ycor()-50) <= ball.ycor() <= (paddle_r.ycor()+50):
-            ball.setx(330)
-            ball.dx *= -1 
-        else:
-            score_l+=1
-            ball.goto(0,0)
-            ball.dx *= -1 
-            update_score()
+        if not paddle_bounce(paddle_r, 330):
+            goal(paddle_l)
 
+    # Ball has reached left edge, 
+    # should be goal or paddle bounce
     if ball.xcor() < -330:
-        # Check if padel is behind the ball
-        if (paddle_l.ycor()-50) <= ball.ycor() <= (paddle_l.ycor()+50):
-            ball.setx(-330)
-            ball.dx *= -1 
-        else:
-            score_r+=1
-            ball.goto(0,0)
-            ball.dx *= -1
-            update_score()
+        if not paddle_bounce(paddle_l, -330):
+            goal(paddle_r)
 
-
-    # Exit on q key press
-    keyboard.on_press_key("q", lambda _:wn.bye())
+        
 
 
 
