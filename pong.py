@@ -88,6 +88,7 @@ def goal(paddle):
     ball.dx = ball.default_speed
     ball.dy = ball.default_speed
     ball.default_speed
+    # Check if the player won
     if paddle.score == 10:
         score.clear()
         score.write("{} won!  ".format(paddle.name), 
@@ -98,9 +99,12 @@ def goal(paddle):
 
 # Computer actions
 def move_c_paddle(paddle_y, ball_y):
+    # Move paddle when the ball approaches the edge 
+    # of the paddle on the y-axis
     if paddle_y+20 < ball_y:
         paddle_l.up()
-    elif paddle_y-20 > ball_y: paddle_l.down()
+    elif paddle_y-20 > ball_y: 
+        paddle_l.down()
         
 
 # Game loop
