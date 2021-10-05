@@ -2,6 +2,7 @@
 import turtle
 import keyboard
 import time
+import random
 from paddle import Paddle
 
 # Gamescreen
@@ -27,18 +28,17 @@ winning_score = 10
 move = False
 startTime = time.time()
 
-
 # Ball
 ball = turtle.Turtle(shape="circle")
 ball.color("white")
 ball.penup()
 ball.goto(0, 0)
-ball.default_speed = 0.15
+ball.default_speed = 0.25
+# Set x and y speed, add some noice to y start speed
 ball.dx = ball.default_speed
-ball.dy = ball.default_speed
+ball.dy = ball.default_speed + random.uniform(-0.1, 0.1)
 # Increase ball speed every bounce, speed += ball.increase * speed
 ball.increase = 0.05
-
 
 # Middle line
 line = turtle.Turtle(shape="square")
@@ -71,9 +71,9 @@ def paddle_bounce(paddle, x):
     if (paddle.get_y()-50) <= ball.ycor() <= (paddle.get_y()+50):
         ball.setx(x)
         ball.dx *= -1 
+        print(ball.dy)
         ball.dx += ball.increase * ball.dx
         ball.dy += ball.increase * ball.dy
-        print(ball.dx)
         return True
     else:
         return False
@@ -115,11 +115,9 @@ while True:
     # This is to make it possible to beat the computer
     # Toggle the move variable to get this behaviour
     if time.time() - startTime > 2:
-        print("False")
         move = False
         startTime = time.time()
     elif time.time() - startTime > 1:
-        print("True")
         move = True
 
     # Check for keypresses
