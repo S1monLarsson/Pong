@@ -1,5 +1,7 @@
 # Import required library
 import turtle
+import keyboard
+import time
 from paddle import Paddle
 
 # Gamescreen
@@ -15,8 +17,16 @@ paddle_l = Paddle("Player A", -350)
 # Right paddle
 paddle_r = Paddle("Player B", 350)
 
-# 1 or 2 players
-computer = True
+# Number of players (1 or 2)
+players = 0
+
+# Winning threshold
+winning_score = 10
+
+# Variables to keep track of when computer player is allowed to move
+move = False
+startTime = time.time()
+
 
 # Ball
 ball = turtle.Turtle(shape="circle")
@@ -26,12 +36,9 @@ ball.goto(0, 0)
 ball.default_speed = 0.15
 ball.dx = ball.default_speed
 ball.dy = ball.default_speed
-ball.increase = 0.01
-loops = 0
+# Increase ball speed every bounce, speed += ball.increase * speed
+ball.increase = 0.05
 
-# Ball position to make computer player
-old_ball_x = 0
-old_ball_y = 0
 
 # Middle line
 line = turtle.Turtle(shape="square")
@@ -49,19 +56,6 @@ score.goto(0, 250)
 score.write("{}            {}".format(paddle_l.score, paddle_r.score), 
           align="center", font=("Courier", 24, "normal"))
 
-# Keyboard binding, paddle moves on release when 2 players
-# Otherwise on push down
-wn.listen()
-if not computer:
-    wn.onkey(paddle_l.up, "w")
-    wn.onkey(paddle_l.down, "s")
-    wn.onkey(paddle_r.up, "Up")
-    wn.onkey(paddle_r.down, "Down")
-else:
-    wn.onkeypress(paddle_r.up, "Up")
-    wn.onkeypress(paddle_r.down, "Down")
-wn.onkey(wn.bye, "q")
-
 
 # Functions
 
@@ -73,9 +67,13 @@ def update_score():
 
 # Check if padel is behind the ball
 def paddle_bounce(paddle, x):
+    # Increase ball speed and reverse direction
     if (paddle.get_y()-50) <= ball.ycor() <= (paddle.get_y()+50):
         ball.setx(x)
         ball.dx *= -1 
+        ball.dx += ball.increase * ball.dx
+        ball.dy += ball.increase * ball.dy
+        print(ball.dx)
         return True
     else:
         return False
@@ -89,7 +87,7 @@ def goal(paddle):
     ball.dy = ball.default_speed
     ball.default_speed
     # Check if the player won
-    if paddle.score == 10:
+    if paddle.score == winning_score:
         score.clear()
         score.write("{} won!  ".format(paddle.name), 
                     align="right", font=("Courier", 24, "normal"))
@@ -99,37 +97,56 @@ def goal(paddle):
 
 # Computer actions
 def move_c_paddle(paddle_y, ball_y):
-    # Move paddle when the ball approaches the edge 
-    # of the paddle on the y-axis
-    if paddle_y+20 < ball_y:
+    # Move paddle to be behind ball
+    if paddle_y < ball_y:
         paddle_l.up()
-    elif paddle_y-20 > ball_y: 
+    elif paddle_y > ball_y: 
         paddle_l.down()
-        
+
+# Make player choose number of players
+players = wn.numinput("#Players", "Type number of players (1 or 2)", 
+                      minval=1, maxval=2)
 
 # Game loop
 while True:
     wn.update()
 
+    # Computer is allowed to move every other secound
+    # This is to make it possible to beat the computer
+    # Toggle the move variable to get this behaviour
+    if time.time() - startTime > 2:
+        print("False")
+        move = False
+        startTime = time.time()
+    elif time.time() - startTime > 1:
+        print("True")
+        move = True
 
-    # Set old ball coordinates
-    old_ball_x = ball.xcor()
-    old_ball_y = ball.ycor()
+    # Check for keypresses
+    if keyboard.is_pressed("Up"):
+        paddle_r.up()
 
-    # Increase speed of ball
-    if loops == 600: # Change this to time
-        print(ball.dx)
-        ball.dx += ball.increase * ball.dx
-        ball.dy += ball.increase * ball.dy
-        loops = 0
-    
+    if keyboard.is_pressed("Down"):
+        paddle_r.down()
+
+    if keyboard.is_pressed('w') and players == 2:
+        paddle_l.up()
+
+    if keyboard.is_pressed('s') and players == 2:
+        paddle_l.down()
 
     # Move ball
     ball.setx(ball.xcor() + ball.dx)
     ball.sety(ball.ycor() + ball.dy)
 
-    # Move computer player
-    move_c_paddle(paddle_l.get_y(), ball.ycor())
+    # Check if 1-player mode and computer is allowed to move
+    if players == 1 and move:
+        # Calculate expected y coordinate at bounce
+        # Don't consider wall bounce in order to send some false values
+        # to the computer pad in order to make it beatable 
+        y = ball.ycor() + ball.dy * (330 - abs(ball.xcor())) / abs(ball.dx)
+        # Move to calculated y position
+        move_c_paddle(paddle_l.get_y(), y)
 
     # Border checking
     if ball.ycor() > 290:
@@ -153,7 +170,6 @@ while True:
             goal(paddle_r)
 
 
-    loops += 1
         
 
 

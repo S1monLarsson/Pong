@@ -24,18 +24,16 @@ class Paddle:
 
     def up(self):
         y = self.get_y();
-        if y <= 230:
-            y += 20
-        else:
-            y = 250
+        y += 1
+        # Don't go beyond the wall 
+        y = min(y, 250)
         self.set_y(y)
 
     def down(self):
         y = self.get_y()
-        if y >= -230:
-            y -= 20
-        else:
-            y = -250
+        y -= 1
+        # Don't go beyond the wall 
+        y = max(y, -250)
         self.set_y(y)
         
 
