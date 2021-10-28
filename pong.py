@@ -33,7 +33,7 @@ ball = turtle.Turtle(shape="circle")
 ball.color("white")
 ball.penup()
 ball.goto(0, 0)
-ball.default_speed = 0.25
+ball.default_speed = 0.50
 # Set x and y speed, add some noice to y start speed
 ball.dx = ball.default_speed
 ball.dy = ball.default_speed + random.uniform(-0.1, 0.1)
@@ -83,8 +83,13 @@ def goal(paddle):
     paddle.score+=1
     ball.goto(0,0)
     ball.dx *= -1
-    ball.dx = ball.default_speed
-    ball.dy = ball.default_speed
+    if ball.dx > 0:
+        ball.dx = ball.default_speed
+    else: 
+        ball.dx = -ball.default_speed
+    ball.dy = ball.default_speed + random.uniform(-0.2, 0.2)
+    if random.random() < 0.5:
+        ball.dy *= -1
     ball.default_speed
     # Check if the player won
     if paddle.score == winning_score:
@@ -117,7 +122,7 @@ while True:
     if time.time() - startTime > 2:
         move = False
         startTime = time.time()
-    elif time.time() - startTime > 1:
+    elif time.time() - startTime > 0.5:
         move = True
 
     # Check for keypresses
